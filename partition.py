@@ -13,11 +13,14 @@ def partition_data(dataset, class_id, K, partition, n_parties, beta, seed):
     n_train = dataset.shape[0]
     y_train = dataset[:,class_id]
 
+    # IID-setting
     if partition == "homo":
         idxs = np.random.permutation(n_train)
         batch_idxs = np.array_split(idxs, n_parties)
         net_dataidx_map = {i: batch_idxs[i] for i in range(n_parties)}
 
+
+    # The Distribution-based label imbalance
     elif partition == "noniid-labeldir":
         min_size = 0
         min_require_size = 10
@@ -52,6 +55,8 @@ def partition_data(dataset, class_id, K, partition, n_parties, beta, seed):
             np.random.shuffle(idx_batch[j])
             net_dataidx_map[j] = idx_batch[j]
 
+
+    # The Quantity-based label imbalance 
     elif partition > "noniid-#label0" and partition <= "noniid-#label9":
         num = eval(partition[13:])
         
@@ -81,6 +86,7 @@ def partition_data(dataset, class_id, K, partition, n_parties, beta, seed):
         for i in range(n_parties):
             net_dataidx_map[i] = net_dataidx_map[i].tolist()
 
+    # The quantities differ accross different clients 
     elif partition == "iid-diff-quantity":
         idxs = np.random.permutation(n_train)
         min_size = 0
